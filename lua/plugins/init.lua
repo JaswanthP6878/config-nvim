@@ -1,14 +1,16 @@
 return {
 
-  -- Colorscheme (dark hacker vibe)
-  {
-    "folke/tokyonight.nvim",
-    priority = 1000,
-    config = function()
-      vim.cmd("colorscheme tokyonight-moon")
-    end,
-  },
-
+ -- gruvbox colorscheme
+      {
+        "morhetz/gruvbox",
+        name = "gruvbox",
+        priority = 1000, -- load before other UI plugins
+        config = function()
+          vim.o.background = "dark" -- or "light"
+          vim.cmd.colorscheme("gruvbox")
+        end,
+      },
+    -- Colorscheme (dark hacker vibe)
   -- Mason
   {
     "williamboman/mason.nvim",
