@@ -31,11 +31,16 @@ return {
   {
     "neovim/nvim-lspconfig",
     config = function()
+        -- local lspconfig = require("lspconfig")
+        local capabilities = require("cmp_nvim_lsp").default_capabilities()
         vim.lsp.config("pyright", {
         settings = {
+            capabilities = capabilities,
             python = {
               analysis = {
                 typeCheckingMode = "off", -- instead of strict
+                autoSearchPaths = true,
+                useLibraryCodeForTypes = true,
               },
             },
           },

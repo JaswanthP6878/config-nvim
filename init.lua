@@ -20,6 +20,20 @@ vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help)
 
 vim.keymap.set("n", "gr", vim.lsp.buf.references)
 
+vim.keymap.set("n", "<leader>tt", function()
+  vim.cmd("vsplit | terminal")
+end)
+
+-- removing highlights for searched text since its annoying
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+
+vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]])
+
+vim.keymap.set("n", "<leader>tc", ":bd!<CR>")
+
+-- to open diagnostics in the code
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float)
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
