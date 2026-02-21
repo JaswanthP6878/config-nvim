@@ -23,7 +23,12 @@ return {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "neovim/nvim-lspconfig" },
     opts = {
-      ensure_installed = { "pyright", "gopls" },
+      ensure_installed = { "pyright", "gopls", "jdtls" },
+      handlers = {
+        -- Prevent mason-lspconfig from auto-configuring jdtls.
+        -- nvim-jdtls handles jdtls exclusively via ftplugin/java.lua.
+        jdtls = function() end,
+      },
     },
   },
 
@@ -34,11 +39,16 @@ return {
         -- local lspconfig = require("lspconfig")
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
         vim.lsp.config("pyright", {
-        settings = {
-            capabilities = capabilities,
+          before_init = function(_, config)
+            local conda = vim.env.CONDA_PREFIX
+            if conda then
+              config.settings.python.pythonPath = conda .. "/bin/python"
+            end
+          end,
+          settings = {
             python = {
               analysis = {
-                typeCheckingMode = "off", -- instead of strict
+                typeCheckingMode = "off",
                 autoSearchPaths = true,
                 useLibraryCodeForTypes = true,
               },
@@ -81,12 +91,18 @@ return {
     end,
   },
 
+  -- Java LSP (nvim-jdtls)
+  {
+    "mfussenegger/nvim-jdtls",
+    ft = "java",
+  },
+
   -- Treesitter
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     opts = {
-      ensure_installed = { "python", "go", "lua" },
+      ensure_installed = { "python", "go", "lua", "java" },
       highlight = { enable = true },
     },
   },
@@ -115,8 +131,7 @@ return {
   -- Git signs
   {
     "lewis6991/gitsigns.nvim",
-    config = function(nvim --version | grep clipboard
-)
+    config = function()
       require("gitsigns").setup()
     end,
   },
