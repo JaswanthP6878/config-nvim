@@ -68,3 +68,16 @@ vim.keymap.set("v", "<leader>ev", function() jdtls.extract_variable(true) end, v
 vim.keymap.set("v", "<leader>em", function() jdtls.extract_method(true) end,   vim.tbl_extend("force", opts, { desc = "Extract method" }))
 vim.keymap.set("n", "<leader>tc", function() jdtls.test_class() end,           vim.tbl_extend("force", opts, { desc = "Test class" }))
 vim.keymap.set("n", "<leader>tm", function() jdtls.test_nearest_method() end,  vim.tbl_extend("force", opts, { desc = "Test nearest method" }))
+
+-- Code generation
+vim.keymap.set("n", "<leader>gc", function()
+  vim.lsp.buf.code_action({ context = { only = { "source.generate.constructor" } }, apply = false })
+end, vim.tbl_extend("force", opts, { desc = "Generate constructor" }))
+
+vim.keymap.set("n", "<leader>gg", function()
+  vim.lsp.buf.code_action({ context = { only = { "source.generate.accessors" } }, apply = false })
+end, vim.tbl_extend("force", opts, { desc = "Generate getters/setters" }))
+
+vim.keymap.set("n", "<leader>gt", function()
+  vim.lsp.buf.code_action({ context = { only = { "source.generate.toString" } }, apply = false })
+end, vim.tbl_extend("force", opts, { desc = "Generate toString" }))
