@@ -6,7 +6,11 @@ return {
         name = "gruvbox",
         priority = 1000, -- load before other UI plugins
         config = function()
-          vim.o.background = "dark" -- or "light"
+          vim.o.background = "dark"
+          vim.g.gruvbox_contrast_dark = "medium"
+          vim.g.gruvbox_italic = 1
+          vim.g.gruvbox_bold = 1
+          vim.g.gruvbox_terminal_colors = 1
           vim.cmd.colorscheme("gruvbox")
         end,
       },
@@ -32,17 +36,118 @@ return {
     },
   },
 
+  -- LSP UI (peek/hover panes)
+  {
+    "nvimdev/lspsaga.nvim",
+    event = "LspAttach",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function()
+      require("lspsaga").setup({
+        ui = { border = "rounded" },
+        lightbulb = { enable = false },
+        symbol_in_winbar = { enable = false },
+      })
+    end,
+  },
+
   -- LSP
   {
     "neovim/nvim-lspconfig",
     config = function()
         -- local lspconfig = require("lspconfig")
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
+        local border = "rounded"
+
+        vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+          border = border,
+          max_width = 90,
+          max_height = 25,
+        })
+        vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+          border = border,
+          max_width = 90,
+          max_height = 12,
+        })
+
+        vim.diagnostic.config({
+          float = {
+            border = border,
+            source = "if_many",
+            max_width = 90,
+          },
+        })
+
+        vim.keymap.set("n", "gd", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek definition", silent = true })
+        vim.keymap.set("n", "gy", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek type definition", silent = true })
+        vim.keymap.set("n", "gD", vim.lsp.buf.definition, { desc = "Go to definition", silent = true })
+        vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover documentation", silent = true })
+        vim.keymap.set("n", "gk", vim.lsp.buf.signature_help, { desc = "Signature help", silent = true })
+        vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help, { desc = "Signature help", silent = true })
+        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol", silent = true })
+        vim.keymap.set("n", "<leader>d", function()
+          vim.diagnostic.open_float(nil, { border = border, source = "if_many", max_width = 90 })
+        end, { desc = "Line diagnostics", silent = true })
+
         vim.lsp.config("pyright", {
-          before_init = function(_, config)
+          capabilities = capabilities,
+          before_init = function(init_params, config)
+            config.settings = config.settings or {}
+            config.settings.python = config.settings.python or {}
+
+            local function executable(path)
+              return path and path ~= "" and vim.fn.executable(path) == 1
+            end
+
+            local function project_python(root_dir)
+              if not root_dir or root_dir == "" then
+                return nil
+              end
+
+              local candidates = {
+                root_dir .. "/.venv/bin/python",
+                root_dir .. "/venv/bin/python",
+              }
+
+              for _, path in ipairs(candidates) do
+                if executable(path) then
+                  return path
+                end
+              end
+            end
+
+            local python_path
             local conda = vim.env.CONDA_PREFIX
-            if conda then
-              config.settings.python.pythonPath = conda .. "/bin/python"
+            if conda and conda ~= "" then
+              local conda_python = conda .. "/bin/python"
+              if executable(conda_python) then
+                python_path = conda_python
+              end
+            end
+
+            if not python_path then
+              local root_dir
+              if init_params and init_params.rootUri then
+                root_dir = vim.uri_to_fname(init_params.rootUri)
+              elseif init_params and init_params.rootPath then
+                root_dir = init_params.rootPath
+              elseif type(config.root_dir) == "string" then
+                root_dir = config.root_dir
+              end
+              python_path = project_python(root_dir)
+            end
+
+            if not python_path then
+              local python3 = vim.fn.exepath("python3")
+              if python3 ~= "" then
+                python_path = python3
+              end
+            end
+
+            if python_path then
+              config.settings.python.pythonPath = python_path
             end
           end,
           settings = {
@@ -121,7 +226,6 @@ return {
             cwd = vim.fn.expand("%:p:h"),
           })
     end)
-    vim.keymap.set("n", "gd", builtin.lsp_definitions)
     vim.keymap.set("n", "gr", builtin.lsp_references)
     vim.keymap.set("n", "gi", builtin.lsp_implementations)
     vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)

@@ -1,8 +1,14 @@
 local jdtls = require("jdtls")
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+local root_dir = vim.fs.root(0, { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", "build.gradle.kts" })
+if not root_dir then
+  vim.notify("jdtls: no Java project root found (missing .git/mvnw/gradlew/pom.xml/build.gradle)", vim.log.levels.WARN)
+  return
+end
+
 -- Unique workspace per project (based on project root folder name)
-local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+local project_name = vim.fn.fnamemodify(root_dir, ":t")
 local workspace_dir = vim.fn.stdpath("data") .. "/jdtls/workspaces/" .. project_name
 
 -- Use Mason's jdtls wrapper script — it handles the launcher jar,
@@ -28,8 +34,6 @@ local spring_boot_path = vim.fn.stdpath("data") .. "/mason/packages/spring-boot-
 local bundles = {}
 local spring_jars = vim.fn.glob(spring_boot_path .. "/extension/jars/*.jar", true, true)
 vim.list_extend(bundles, spring_jars)
-
-local root_dir = vim.fs.root(0, { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle", "build.gradle.kts" })
 
 local config = {
   cmd = cmd,

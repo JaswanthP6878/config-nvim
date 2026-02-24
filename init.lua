@@ -11,15 +11,6 @@ vim.g.mapleader = " "
 vim.opt.clipboard = "unnamedplus"
 
 -- LSP
-vim.keymap.set("n", "gd", vim.lsp.buf.definition)
-vim.keymap.set("n", "K", vim.lsp.buf.hover)
-vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
-
-vim.keymap.set("n", "gk", vim.lsp.buf.signature_help)
-vim.keymap.set("i", "<C-k>", vim.lsp.buf.signature_help)
-
-vim.keymap.set("n", "gr", vim.lsp.buf.references)
-
 vim.keymap.set("n", "<leader>tt", function()
   vim.cmd("vsplit | terminal")
 end)
@@ -30,9 +21,6 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]])
 
 vim.keymap.set("n", "<leader>tc", ":bd!<CR>")
-
--- to open diagnostics in the code
-vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float)
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -48,4 +36,3 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup("plugins")
-
