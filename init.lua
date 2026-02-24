@@ -10,6 +10,8 @@ vim.g.mapleader = " "
 
 vim.opt.clipboard = "unnamedplus"
 
+vim.opt.wrap= false
+
 -- LSP
 vim.keymap.set("n", "<leader>tt", function()
   vim.cmd("vsplit | terminal")
