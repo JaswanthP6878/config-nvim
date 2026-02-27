@@ -82,6 +82,10 @@ vim.keymap.set("n", "<leader>gg", function()
   vim.lsp.buf.code_action({ context = { only = { "source.generate.accessors" } }, apply = false })
 end, vim.tbl_extend("force", opts, { desc = "Generate getters/setters" }))
 
+vim.keymap.set("n", "<leader>gm", function()
+  vim.lsp.buf.code_action({ context = { only = { "source.override.methods" } }, apply = false })
+end, vim.tbl_extend("force", opts, { desc = "Generate inherited methods" }))
+
 vim.keymap.set("n", "<leader>gt", function()
   vim.lsp.buf.code_action({ context = { only = { "source.generate.toString" } }, apply = false })
 end, vim.tbl_extend("force", opts, { desc = "Generate toString" }))

@@ -12,6 +12,9 @@ return {
           vim.g.gruvbox_bold = 1
           vim.g.gruvbox_terminal_colors = 1
           vim.cmd.colorscheme("gruvbox")
+          if type(_G.apply_ghostty_harmonized_highlights) == "function" then
+            _G.apply_ghostty_harmonized_highlights()
+          end
         end,
       },
     -- Colorscheme (dark hacker vibe)
@@ -27,7 +30,7 @@ return {
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "neovim/nvim-lspconfig" },
     opts = {
-      ensure_installed = { "pyright", "gopls", "jdtls" },
+      ensure_installed = { "pyright", "gopls", "jdtls", "rust_analyzer" },
       handlers = {
         -- Prevent mason-lspconfig from auto-configuring jdtls.
         -- nvim-jdtls handles jdtls exclusively via ftplugin/java.lua.
@@ -160,9 +163,27 @@ return {
             },
           },
         })
-	
+
+      vim.lsp.config("rust_analyzer", {
+        capabilities = capabilities,
+        settings = {
+          ["rust-analyzer"] = {
+            checkOnSave = {
+              command = "clippy",
+            },
+            imports = {
+              granularity = {
+                group = "module",
+              },
+              prefix = "self",
+            },
+          },
+        },
+      })
+
       vim.lsp.enable("pyright")
       vim.lsp.enable("gopls")
+      vim.lsp.enable("rust_analyzer")
     end,
   },
 
@@ -207,9 +228,57 @@ return {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     opts = {
-      ensure_installed = { "python", "go", "lua", "java" },
+      ensure_installed = { "python", "go", "lua", "java", "rust" },
       highlight = { enable = true },
     },
+  },
+
+  -- Indent guides + active scope
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    opts = function()
+      local hooks = require("ibl.hooks")
+
+      hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+        vim.api.nvim_set_hl(0, "IblIndent", { fg = "#5a524c", nocombine = true })
+        vim.api.nvim_set_hl(0, "IblScope", { fg = "#a89984", nocombine = true })
+      end)
+
+      return {
+        indent = {
+          char = "│",
+          tab_char = "│",
+          highlight = "IblIndent",
+        },
+        scope = {
+          enabled = true,
+          show_start = false,
+          show_end = false,
+          highlight = "IblScope",
+        },
+        whitespace = {
+          remove_blankline_trail = true,
+        },
+        exclude = {
+          buftypes = { "terminal", "nofile", "prompt", "quickfix" },
+          filetypes = {
+            "help",
+            "alpha",
+            "dashboard",
+            "lazy",
+            "mason",
+            "neo-tree",
+            "notify",
+            "snacks_dashboard",
+            "snacks_notif",
+            "snacks_terminal",
+            "TelescopePrompt",
+            "Trouble",
+          },
+        },
+      }
+    end,
   },
 
   -- Telescope (file finder)
@@ -258,6 +327,87 @@ return {
     end,
   },
 
+  -- Neo-tree (VS Code-like sidebar explorer)
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    lazy = false,
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      local project_root = require("config.project_root")
+      local neotree = require("neo-tree.command")
+
+      require("neo-tree").setup({
+        close_if_last_window = true,
+        enable_git_status = true,
+        enable_diagnostics = true,
+        filesystem = {
+          window = {
+            mappings = {
+              ["a"] = {
+                "add",
+                config = {
+                  show_path = "none",
+                },
+              },
+              ["A"] = "add_directory",
+            },
+          },
+          follow_current_file = {
+            enabled = true,
+          },
+          use_libuv_file_watcher = true,
+          filtered_items = {
+            hide_gitignored = true,
+            hide_dotfiles = false,
+          },
+        },
+        window = {
+          position = "left",
+          width = 34,
+        },
+      })
+
+      vim.keymap.set("n", "<leader>e", function()
+        local root = project_root.get_root(0)
+        neotree.execute({
+          toggle = true,
+          dir = root,
+          position = "left",
+          source = "filesystem",
+        })
+      end, { desc = "Toggle Explorer (Neo-tree)" })
+
+      vim.keymap.set("n", "<leader>er", function()
+        neotree.execute({
+          reveal = true,
+          position = "left",
+          source = "filesystem",
+        })
+      end, { desc = "Reveal current file (Neo-tree)" })
+
+      vim.api.nvim_create_autocmd("VimEnter", {
+        once = true,
+        callback = function()
+          local argv0 = vim.fn.argv(0)
+          if argv0 ~= "" and vim.fn.isdirectory(argv0) == 1 then
+            vim.fn.chdir(argv0)
+            neotree.execute({
+              action = "show",
+              dir = argv0,
+              position = "left",
+              source = "filesystem",
+            })
+          end
+        end,
+      })
+    end,
+  },
+
   -- Git signs
   {
     "lewis6991/gitsigns.nvim",
@@ -270,6 +420,13 @@ return {
       config = function()
         require("nvim-autopairs").setup({})
       end,
+    },
+
+    -- when claude changes files, refresh buffers smartly
+    -- this does not reload buffers that have been changed
+    {
+    'diogo464/hotreload.nvim',
+    opts = {}  -- Uses fs_event watchers by default
     },
 
 }
