@@ -4,7 +4,7 @@ return {
       {
         "morhetz/gruvbox",
         name = "gruvbox",
-        priority = 1000, -- load before other UI plugins
+priority = 1000, -- load before other UI plugins
         config = function()
           vim.o.background = "dark"
           vim.g.gruvbox_contrast_dark = "medium"
@@ -428,5 +428,21 @@ return {
     'diogo464/hotreload.nvim',
     opts = {}  -- Uses fs_event watchers by default
     },
+
+    -- adding discord presence for fun!
+    {
+        'vyfor/cord.nvim',
+        config = function()
+            require('cord').setup({
+                editor = {
+                    name = "nvim",
+                    tooltip = 'vim',
+                },
+                display = {
+                    swap_fields = true,
+                },
+            })
+        end
+    }
 
 }
