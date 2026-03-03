@@ -77,6 +77,19 @@ priority = 1000, -- load before other UI plugins
         })
 
         vim.diagnostic.config({
+          virtual_text = {
+            prefix = "●",        -- dot before the message
+            spacing = 4,
+            source = "if_many",  -- show source only when multiple LSPs
+            severity = {
+              min = vim.diagnostic.severity.HINT,
+            },
+          },
+          signs = {
+            severity = { min = vim.diagnostic.severity.HINT },
+          },
+          underline = true,
+          severity_sort = true,
           float = {
             border = border,
             source = "if_many",
