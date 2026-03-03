@@ -53,6 +53,7 @@ priority = 1000, -- load before other UI plugins
         lightbulb = { enable = false },
         symbol_in_winbar = { enable = false },
       })
+      vim.keymap.set("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { desc = "Code action", silent = true })
     end,
   },
 
