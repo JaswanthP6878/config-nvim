@@ -65,6 +65,32 @@ priority = 1000, -- load before other UI plugins
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
         local border = "rounded"
 
+        vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#ff5555" })
+        vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn",  { fg = "#f1fa8c" })
+        vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo",  { fg = "#8be9fd" })
+        vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint",  { fg = "#50fa7b" })
+
+        vim.fn.sign_define("DiagnosticSignError", {
+          text = "E",
+          texthl = "DiagnosticSignError",
+        })
+
+        vim.fn.sign_define("DiagnosticSignWarn", {
+          text = "W",
+          texthl = "DiagnosticSignWarn",
+        })
+
+        vim.fn.sign_define("DiagnosticSignInfo", {
+          text = "I",
+          texthl = "DiagnosticSignInfo",
+        })
+
+        vim.fn.sign_define("DiagnosticSignHint", {
+          text = "H",
+          texthl = "DiagnosticSignHint",
+        })
+
+
         vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
           border = border,
           max_width = 90,
@@ -78,7 +104,7 @@ priority = 1000, -- load before other UI plugins
 
         vim.diagnostic.config({
           virtual_text = {
-            prefix = "●",        -- dot before the message
+            prefix = "",        -- dot before the message
             spacing = 4,
             source = "if_many",  -- show source only when multiple LSPs
             severity = {
