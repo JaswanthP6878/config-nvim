@@ -70,26 +70,6 @@ priority = 1000, -- load before other UI plugins
         vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo",  { fg = "#8be9fd" })
         vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint",  { fg = "#50fa7b" })
 
-        vim.fn.sign_define("DiagnosticSignError", {
-          text = "E",
-          texthl = "DiagnosticSignError",
-        })
-
-        vim.fn.sign_define("DiagnosticSignWarn", {
-          text = "W",
-          texthl = "DiagnosticSignWarn",
-        })
-
-        vim.fn.sign_define("DiagnosticSignInfo", {
-          text = "I",
-          texthl = "DiagnosticSignInfo",
-        })
-
-        vim.fn.sign_define("DiagnosticSignHint", {
-          text = "H",
-          texthl = "DiagnosticSignHint",
-        })
-
 
         vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
           border = border,
@@ -113,6 +93,12 @@ priority = 1000, -- load before other UI plugins
           },
           signs = {
             severity = { min = vim.diagnostic.severity.HINT },
+            text = {
+              [vim.diagnostic.severity.ERROR] = "E",
+              [vim.diagnostic.severity.WARN]  = "W",
+              [vim.diagnostic.severity.INFO]  = "I",
+              [vim.diagnostic.severity.HINT]  = "H",
+            },
           },
           underline = true,
           severity_sort = true,
@@ -208,7 +194,8 @@ priority = 1000, -- load before other UI plugins
         capabilities = capabilities,
         settings = {
           ["rust-analyzer"] = {
-            checkOnSave = {
+            checkOnSave = true,
+            check = {
               command = "clippy",
             },
             imports = {
@@ -371,14 +358,39 @@ priority = 1000, -- load before other UI plugins
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
-    lazy = false,
+    cmd = { "Neotree" },
+    keys = {
+      {
+        "<leader>e",
+        function()
+          local root = require("config.project_root").get_root(0)
+          require("neo-tree.command").execute({
+            toggle = true,
+            dir = root,
+            position = "left",
+            source = "filesystem",
+          })
+        end,
+        desc = "Toggle Explorer (Neo-tree)",
+      },
+      {
+        "<leader>er",
+        function()
+          require("neo-tree.command").execute({
+            reveal = true,
+            position = "left",
+            source = "filesystem",
+          })
+        end,
+        desc = "Reveal current file (Neo-tree)",
+      },
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
     },
     config = function()
-      local project_root = require("config.project_root")
       local neotree = require("neo-tree.command")
 
       require("neo-tree").setup({
@@ -411,24 +423,6 @@ priority = 1000, -- load before other UI plugins
           width = 34,
         },
       })
-
-      vim.keymap.set("n", "<leader>e", function()
-        local root = project_root.get_root(0)
-        neotree.execute({
-          toggle = true,
-          dir = root,
-          position = "left",
-          source = "filesystem",
-        })
-      end, { desc = "Toggle Explorer (Neo-tree)" })
-
-      vim.keymap.set("n", "<leader>er", function()
-        neotree.execute({
-          reveal = true,
-          position = "left",
-          source = "filesystem",
-        })
-      end, { desc = "Reveal current file (Neo-tree)" })
 
       vim.api.nvim_create_autocmd("VimEnter", {
         once = true,
