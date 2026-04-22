@@ -51,15 +51,16 @@ Hot reload has been added so code changes made by the agent are picked up automa
 ```bash
 #!/bin/bash
 set -e
+
 echo "Syncing external configs..."
 
-ALACRITTY_SRC="$HOME/.config/alacritty/alacritty.yaml"
+ALACRITTY_SRC="$HOME/.config/alacritty/alacritty.toml"
 ZSHRC_SRC="$HOME/.zshrc"
 TMUX_SRC="$HOME/.tmux.conf"
 
-ALACRITTY_DEST="configs/alacritty.yaml"
-ZSHRC_DEST="configs/.zshrc"
-TMUX_DEST="$HOME/.tmux.conf"
+ALACRITTY_DEST="configs_terminal/"
+ZSHRC_DEST="configs_terminal/"
+TMUX_DEST="configs_terminal/"
 
 cp "$ALACRITTY_SRC" "$ALACRITTY_DEST"
 cp "$ZSHRC_SRC" "$ZSHRC_DEST"
@@ -68,7 +69,5 @@ cp "$TMUX_SRC" "$TMUX_DEST"
 git add "$ALACRITTY_DEST"
 git add "$ZSHRC_DEST"
 git add "$TMUX_DEST"
-
-echo "Configs synced and staged ✅"
-
+echo "Configs synced and staged"
 ```
