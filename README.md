@@ -44,13 +44,31 @@ public class UserService {
 
 }
 ```
-## Ghostty Visual Harmonization
-
-Neovim is configured with transparent editor/sidebar/floating backgrounds so it matches Ghostty opacity.
-
-- Ghostty setting: `background-opacity` in `~/Library/Application Support/com.mitchellh.ghostty/config`
-- Neovim override entrypoint: `apply_ghostty_harmonized_highlights()` in `init.lua`
-
 ## Agent Workflow
-
 Hot reload has been added so code changes made by the agent are picked up automatically while working.
+
+## Pre-commit hook for syncing (alacritty, tmux and zshrc):
+```bash
+#!/bin/bash
+set -e
+echo "Syncing external configs..."
+
+ALACRITTY_SRC="$HOME/.config/alacritty/alacritty.yaml"
+ZSHRC_SRC="$HOME/.zshrc"
+TMUX_SRC="$HOME/.tmux.conf"
+
+ALACRITTY_DEST="configs/alacritty.yaml"
+ZSHRC_DEST="configs/.zshrc"
+TMUX_DEST="$HOME/.tmux.conf"
+
+cp "$ALACRITTY_SRC" "$ALACRITTY_DEST"
+cp "$ZSHRC_SRC" "$ZSHRC_DEST"
+cp "$TMUX_SRC" "$TMUX_DEST"
+
+git add "$ALACRITTY_DEST"
+git add "$ZSHRC_DEST"
+git add "$TMUX_DEST"
+
+echo "Configs synced and staged ✅"
+
+```
