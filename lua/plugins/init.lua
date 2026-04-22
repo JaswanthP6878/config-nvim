@@ -1,24 +1,23 @@
 return {
 
  -- gruvbox colorscheme
-      {
-        "morhetz/gruvbox",
-        name = "gruvbox",
-priority = 1000, -- load before other UI plugins
-        config = function()
-          vim.o.background = "dark"
-          vim.g.gruvbox_contrast_dark = "medium"
-          vim.g.gruvbox_italic = 1
-          vim.g.gruvbox_bold = 1
-          vim.g.gruvbox_terminal_colors = 1
-          vim.cmd.colorscheme("gruvbox")
-          if type(_G.apply_ghostty_harmonized_highlights) == "function" then
-            _G.apply_ghostty_harmonized_highlights()
-          end
-        end,
-      },
-    -- Colorscheme (dark hacker vibe)
-  -- Mason
+        {
+         "morhetz/gruvbox",
+          name = "gruvbox",
+          priority = 1000, -- load before other UI plugins
+          config = function()
+            vim.o.background = "dark"
+            vim.g.gruvbox_contrast_dark = "medium"
+            vim.g.gruvbox_italic = 1
+            vim.g.gruvbox_bold = 1
+            vim.g.gruvbox_terminal_colors = 1
+            vim.cmd.colorscheme("gruvbox")
+         if type(_G.apply_ghostty_harmonized_highlights) == "function" then
+              _G.apply_ghostty_harmonized_highlights()
+              end
+          end,
+        },
+
   {
     "williamboman/mason.nvim",
     config = function()
@@ -30,7 +29,7 @@ priority = 1000, -- load before other UI plugins
     "williamboman/mason-lspconfig.nvim",
     dependencies = { "neovim/nvim-lspconfig" },
     opts = {
-      ensure_installed = { "pyright", "gopls", "jdtls", "rust_analyzer" },
+      ensure_installed = { "pyright", "gopls", "jdtls", "rust_analyzer", "clangd" },
       handlers = {
         -- Prevent mason-lspconfig from auto-configuring jdtls.
         -- nvim-jdtls handles jdtls exclusively via ftplugin/java.lua.
@@ -111,6 +110,7 @@ priority = 1000, -- load before other UI plugins
 
         vim.keymap.set("n", "gd", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek definition", silent = true })
         vim.keymap.set("n", "gy", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek type definition", silent = true })
+        vim.keymap.set("n", "gD", vim.lsp.buf.definition, { desc = "Go to definition", silent = true })
         vim.keymap.set("n", "gD", vim.lsp.buf.definition, { desc = "Go to definition", silent = true })
         vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover documentation", silent = true })
         vim.keymap.set("n", "gk", vim.lsp.buf.signature_help, { desc = "Signature help", silent = true })
@@ -196,7 +196,7 @@ priority = 1000, -- load before other UI plugins
           ["rust-analyzer"] = {
             checkOnSave = true,
             check = {
-              command = "clippy",
+              command = "check",
             },
             imports = {
               granularity = {
@@ -208,9 +208,19 @@ priority = 1000, -- load before other UI plugins
         },
       })
 
+      vim.lsp.config("clangd", {
+        capabilities = capabilities,
+        cmd = { "clangd", "--background-index", "--clang-tidy", "--header-insertion=iwyu" },
+        filetypes = { "c", "cpp", "objc", "objcpp" },
+        init_options = {
+          clangdFileStatus = true,
+        },
+      })
+
       vim.lsp.enable("pyright")
       vim.lsp.enable("gopls")
       vim.lsp.enable("rust_analyzer")
+      vim.lsp.enable("clangd")
     end,
   },
 
@@ -255,7 +265,7 @@ priority = 1000, -- load before other UI plugins
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     opts = {
-      ensure_installed = { "python", "go", "lua", "java", "rust" },
+      ensure_installed = { "python", "go", "lua", "java", "rust", "c", "cpp" },
       highlight = { enable = true },
     },
   },
@@ -449,10 +459,43 @@ priority = 1000, -- load before other UI plugins
       require("gitsigns").setup()
     end,
   },
+    -- {
+    --   "windwp/nvim-autopairs",
+    --   config = function()
+    --     local npairs = require("nvim-autopairs").setup({})
+    --     local Rule = require("nvim-autopairs.rule")
+    --     npairs.setup({
+    --         check_ts = true, -- use treesitter
+    --     })
+    --     -- For rust specific < > 
+    --     npairs.add_rules({
+    --         Rule("<", ">", "rust")
+    --             :with_pair(function(opts)
+    --                 return opts.line:match("[%w_]+%s*<$") ~= nil
+    --             end),
+    --     })
+    --   end,
+    -- },
+    --
     {
       "windwp/nvim-autopairs",
+      event = "InsertEnter", -- IMPORTANT: ensures plugin loads
       config = function()
-        require("nvim-autopairs").setup({})
+        local ok, npairs = pcall(require, "nvim-autopairs")
+        if not ok then return end
+
+        local Rule = require("nvim-autopairs.rule")
+
+        npairs.setup({
+          check_ts = true,
+        })
+
+        npairs.add_rules({
+          Rule("<", ">", "rust")
+            :with_pair(function(opts)
+              return opts.line:match("[%w_:]+%s*<$") ~= nil
+            end),
+        })
       end,
     },
 
@@ -464,19 +507,19 @@ priority = 1000, -- load before other UI plugins
     },
 
     -- adding discord presence for fun!
-    {
-        'vyfor/cord.nvim',
-        config = function()
-            require('cord').setup({
-                editor = {
-                    name = "nvim",
-                    tooltip = 'vim',
-                },
-                display = {
-                    swap_fields = true,
-                },
-            })
-        end
-    }
+    -- {
+    --     'vyfor/cord.nvim',
+    --     config = function()
+    --         require('cord').setup({
+    --             editor = {
+    --                 name = "nvim",
+    --                 tooltip = 'vim',
+    --             },
+    --             display = {
+    --                 swap_fields = true,
+    --             },
+    --         })
+    --     end
+    -- }
 
 }

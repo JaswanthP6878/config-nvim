@@ -10,6 +10,10 @@ local ROOT_MARKERS = {
   "pyproject.toml",
   "go.mod",
   "package.json",
+  "CMakeLists.txt",
+  "compile_commands.json",
+  ".clangd",
+  "Makefile",
 }
 
 function M.get_root(bufnr)

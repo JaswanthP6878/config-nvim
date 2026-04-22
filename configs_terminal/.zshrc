@@ -162,9 +162,16 @@ export PATH="$PATH:/usr/local/texlive/2025basic/bin/universal-darwin"
 test -e /Users/jaswanthpinnepu/.iterm2_shell_integration.zsh && source /Users/jaswanthpinnepu/.iterm2_shell_integration.zsh || true
 export PATH=$HOME/bin:$PATH
 
+# NVM — lazy-loaded (activates on first use of nvm/node/npm/npx)
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+nvm() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+  nvm "$@"
+}
+node() { nvm; node "$@"; }
+npm()  { nvm; npm  "$@"; }
+npx()  { nvm; npx  "$@"; }
 
 # bun completions
 [ -s "/Users/jaswanthpinnepu/.bun/_bun" ] && source "/Users/jaswanthpinnepu/.bun/_bun"
@@ -202,7 +209,7 @@ export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 # Added by Antigravity
 export PATH="/Users/jaswanthpinnepu/.antigravity/antigravity/bin:$PATH"
 # Removed to avoid overriding Conda env Python in tmux/Neovim
- alias python="/opt/homebrew/bin/python3.12"
+# alias python="/opt/homebrew/bin/python3.12" # do not alias it is breaking the conda env(type python3 if needed my guy?)
 
 
 # opencode
@@ -217,9 +224,14 @@ zle -N down-line-or-beginning-search
 bindkey -M vicmd 'k' up-line-or-beginning-search
 bindkey -M vicmd 'j' down-line-or-beginning-search
 # alias block -- fcking cumbersome typing it everytime, also bringing all aliasses in one place
-alias tmux='t'
+# alias tmux='t'
 alias rgf='rg --files | rg'
 alias gitgraph="git log --graph --oneline --decorate --all"
 alias vi="nvim"
 alias zshconfig="nvim ~/.zshrc"
+# remapping ls to exa
+alias ls="exa"
+# alias gitroot="cd \"$(git rev-parse --show-toplevel)\""
+# for lazigit
+alias lgit="lazygit"
 ###

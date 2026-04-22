@@ -63,6 +63,16 @@ vim.keymap.set("n", "<leader>nf", function()
   require("config.new_file").create_from_prompt()
 end, { desc = "Create file by path" })
 
+-- toggling the diagnostics text
+local diagnostics_visible = true
+vim.keymap.set("n", "<leader>td", function()
+  diagnostics_visible = not diagnostics_visible
+
+  vim.diagnostic.config({
+    virtual_text = diagnostics_visible,
+  })
+end, { desc = "Toggle diagnostic virtual text" })
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
